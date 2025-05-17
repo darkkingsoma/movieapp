@@ -76,6 +76,11 @@ export default function MovieCard({ movie, category, onDelete, source = 'tmdb', 
       return;
     }
 
+    if (!session.user?.id) {
+      setError('Session error: Please sign in again');
+      return;
+    }
+
     if (!selectedList) {
       setError('Please select a list');
       return;
@@ -105,6 +110,7 @@ export default function MovieCard({ movie, category, onDelete, source = 'tmdb', 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(movieData),
+        credentials: 'include' // Add this to ensure cookies are sent
       });
 
       const data = await response.json();

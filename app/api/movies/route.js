@@ -6,7 +6,7 @@ import prisma from '../../../lib/prisma';
 export async function GET(request) {
   try {
     const session = await getServerSession(authOptions);
-    console.log('GET /api/movies - Session:', session);
+    console.log('GET /api/movies - Session:', JSON.stringify(session, null, 2));
     
     if (!session) {
       console.log('GET /api/movies - No session found');
@@ -14,7 +14,7 @@ export async function GET(request) {
     }
 
     if (!session.user?.id) {
-      console.log('GET /api/movies - No user ID in session:', session);
+      console.log('GET /api/movies - No user ID in session:', JSON.stringify(session, null, 2));
       return NextResponse.json({ error: 'No user ID in session' }, { status: 401 });
     }
 
@@ -64,7 +64,19 @@ export async function POST(request) {
       return NextResponse.json({ error: 'No user in session' }, { status: 401 });
     }
 
-    const userId = session.user.id || session.user.sub;
+    // Get user ID from session, handling both Google OAuth and credentials
+    let userId = session.user.id;
+    
+    // If no ID in session, try to find user by email
+    if (!userId && session.user.email) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email }
+      });
+      if (user) {
+        userId = user.id;
+      }
+    }
+
     if (!userId) {
       console.log('POST /api/movies - No user ID in session:', JSON.stringify(session.user, null, 2));
       return NextResponse.json({ error: 'Invalid user ID' }, { status: 401 });
