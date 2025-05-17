@@ -111,12 +111,15 @@ export default function MovieCard({ movie, category, onDelete, source = 'tmdb', 
       
       if (!response.ok) {
         console.error('Add to list error:', data);
-        throw new Error(data.error || 'Failed to add movie to list');
+        throw new Error(data.error || data.details || 'Failed to add movie to list');
       }
       
       setError('');
       setShowAddModal(false);
       setSelectedList('');
+      
+      // Show success message
+      alert(`Successfully added "${movie.title}" to your ${selectedList.replace('-', ' ')} list!`);
       
       // Reload the page after successful addition
       window.location.reload();
