@@ -64,19 +64,9 @@ export async function POST(request) {
       return NextResponse.json({ error: 'No user in session' }, { status: 401 });
     }
 
-    // Get user ID from session, handling both Google OAuth and credentials
-    let userId = session.user.id;
+    // Get user ID from session
+    const userId = session.user.id;
     
-    // If no ID in session, try to find user by email
-    if (!userId && session.user.email) {
-      const user = await prisma.user.findUnique({
-        where: { email: session.user.email }
-      });
-      if (user) {
-        userId = user.id;
-      }
-    }
-
     if (!userId) {
       console.log('POST /api/movies - No user ID in session:', JSON.stringify(session.user, null, 2));
       return NextResponse.json({ error: 'Invalid user ID' }, { status: 401 });

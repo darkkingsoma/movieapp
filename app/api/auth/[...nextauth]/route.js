@@ -160,10 +160,11 @@ export const authOptions = {
       return true;
     },
     async session({ session, token }) {
+      // Ensure user ID is always included in the session
       if (token) {
         session.user = {
           ...session.user,
-          id: token.sub || token.id,
+          id: token.id || token.sub,
           username: token.username
         };
       }
@@ -171,11 +172,13 @@ export const authOptions = {
     },
     async jwt({ token, user, account, profile }) {
       if (user) {
+        // When signing in
         token.id = user.id;
         token.username = user.username;
       }
       
       if (account?.provider === 'google' && profile) {
+        // For Google sign-in
         const dbUser = await prisma.user.findUnique({
           where: { email: profile.email }
         });
